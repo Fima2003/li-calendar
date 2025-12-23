@@ -1,0 +1,9 @@
+runConfig:
+  cpu: 1
+  memoryMiB: 512
+  concurrency: 80
+  minInstances: 0  # Scale down to zero when not in use to save cost
+  maxInstances: 10
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: li-calendar-7c63a
