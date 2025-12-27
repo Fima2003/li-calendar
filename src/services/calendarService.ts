@@ -2,17 +2,17 @@ import { db } from "@/lib/firebase";
 import { DayData, CalendarMonthData } from "@/types/calendar";
 import { collection, doc, getDocs, setDoc, query, where } from "firebase/firestore";
 
-const COLLECTION_NAME = "calendar_days";
+// Helper to get collection reference for a user
+const getUserCalendarCollection = (userId: string) => {
+    return collection(db, "users", userId, "calendar_data");
+};
 
-export const getCalendarData = async (month: number, year: number): Promise<CalendarMonthData> => {
+export const getCalendarData = async (month: number, year: number, userId: string): Promise<CalendarMonthData> => {
     const data: CalendarMonthData = {};
 
-    // Try LocalStorage first (hybrid approach for demo stability) or fallback
-    if (typeof window !== 'undefined') {
-        const local = localStorage.getItem(`calendar_${year}_${month}`);
-        if (local) {
-            Object.assign(data, JSON.parse(local));
-        }
+    if (!userId) {
+        console.warn("No userId provided to getCalendarData");
+        return data;
     }
 
     try {
@@ -23,7 +23,7 @@ export const getCalendarData = async (month: number, year: number): Promise<Cale
         const endDateStr = endDate.toISOString().split('T')[0];
 
         const q = query(
-            collection(db, COLLECTION_NAME),
+            getUserCalendarCollection(userId),
             where("date", ">=", startDateStr),
             where("date", "<=", endDateStr)
         );
@@ -33,45 +33,30 @@ export const getCalendarData = async (month: number, year: number): Promise<Cale
             data[doc.id] = doc.data() as DayData;
         });
     } catch (error) {
-        console.warn("Firestore fetch failed, relying on LocalStorage:", error);
+        console.error("Firestore fetch failed:", error);
     }
 
     return data;
 };
 
-export const updateDay = async (dayData: DayData) => {
+export const updateDay = async (dayData: DayData, userId: string) => {
     if (!dayData.date) {
         console.error("Day date is missing");
         return false;
     }
 
-    // Update LocalStorage
-    if (typeof window !== 'undefined') {
-        try {
-            const dateObj = new Date(dayData.date);
-            const month = dateObj.getMonth();
-            const year = dateObj.getFullYear();
-            const key = `calendar_${year}_${month}`;
-
-            const existingDataStr = localStorage.getItem(key);
-            const existingData: CalendarMonthData = existingDataStr ? JSON.parse(existingDataStr) : {};
-
-            existingData[dayData.date] = dayData;
-            localStorage.setItem(key, JSON.stringify(existingData));
-            console.log("Saved to LocalStorage:", dayData);
-        } catch (e) {
-            console.error("LocalStorage save failed", e);
-        }
+    if (!userId) {
+        console.error("No userId provided for updateDay");
+        return false;
     }
 
     // Update Firestore
     try {
-        const docRef = doc(db, COLLECTION_NAME, dayData.date);
+        const docRef = doc(db, "users", userId, "calendar_data", dayData.date);
         await setDoc(docRef, dayData, { merge: true });
         return true;
     } catch (error) {
         console.error("Firestore update failed:", error);
-        // Return true anyway if LocalStorage worked, so UI doesn't break
-        return true;
+        return false;
     }
 };

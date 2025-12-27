@@ -17,7 +17,7 @@ const StatsWidget: React.FC<StatsWidgetProps> = ({ data }) => {
     const getPercentage = (count: number) => totalPosts === 0 ? 0 : Math.round((count / totalPosts) * 100);
 
     return (
-        <div className="neo-box p-4 fixed top-4 right-4 z-50 flex gap-4 text-sm font-bold bg-white">
+        <div className="neo-box p-4 fixed bottom-4 right-4 z-50 flex gap-4 text-sm font-bold bg-white">
             <div className="text-neo-black">
                 <span className="block text-xs uppercase text-gray-500">Value (70%)</span>
                 <div className="flex items-end gap-1">

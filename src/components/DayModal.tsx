@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DayData, Status, PostFormat, PostRule } from '@/types/calendar';
 import { updateDay } from '@/services/calendarService';
+import { useAuth } from './AuthContext';
 
 interface DayModalProps {
     date: Date;
@@ -11,6 +12,7 @@ interface DayModalProps {
 const DayModal: React.FC<DayModalProps> = ({ date, initialData, onClose }) => {
     const [data, setData] = useState<DayData>(initialData || { date: date.toISOString().split('T')[0], status: Status.CHOOSE_TOPIC });
     const [loading, setLoading] = useState(false);
+    const { user } = useAuth();
 
     // States for the wizard flow
     // "Choose Topic" -> "Think of text" -> "Polish text" -> "Schedule" -> "Post"
@@ -30,7 +32,9 @@ const DayModal: React.FC<DayModalProps> = ({ date, initialData, onClose }) => {
         // Optimistic update
         setData(newData);
         setLoading(true);
-        await updateDay(newData);
+        if (user) {
+            await updateDay(newData, user.uid);
+        }
         setLoading(false);
     };
 
@@ -68,7 +72,9 @@ const DayModal: React.FC<DayModalProps> = ({ date, initialData, onClose }) => {
         const newData = { ...data, [field]: value };
         setData(newData); // Immediate UI update
         // We can debounce saving if needed, but for now just dont await
-        updateDay(newData);
+        if (user) {
+            updateDay(newData, user.uid);
+        }
     };
 
     const renderContent = () => {
