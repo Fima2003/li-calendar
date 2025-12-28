@@ -5,12 +5,14 @@ export interface MatrixData {
     colHeaders: string[];
     rowHeaders: string[];
     cells: string[][];
+    cellUsage?: { [key: string]: string }; // key: "row-col", value: ISO date string
 }
 
 interface MatrixFirestoreData {
     colHeaders: string[];
     rowHeaders: string[];
     rows: { data: string[] }[];
+    cellUsage?: { [key: string]: string };
 }
 
 const getUserMatrixDoc = (userId: string) => {
@@ -36,7 +38,8 @@ export const getMatrix = async (userId: string): Promise<MatrixData | null> => {
             return {
                 colHeaders: data.colHeaders || [],
                 rowHeaders: data.rowHeaders || [],
-                cells: cells
+                cells: cells,
+                cellUsage: data.cellUsage || {}
             };
         }
         return null;
@@ -55,13 +58,41 @@ export const saveMatrix = async (userId: string, data: MatrixData): Promise<bool
         const firestoreData: MatrixFirestoreData = {
             colHeaders: data.colHeaders,
             rowHeaders: data.rowHeaders,
-            rows: data.cells.map(row => ({ data: row }))
+            rows: data.cells.map(row => ({ data: row })),
+            cellUsage: data.cellUsage || {}
         };
 
         await setDoc(docRef, firestoreData, { merge: true });
         return true;
     } catch (error) {
         console.error("Error saving matrix:", error);
+        return false;
+    }
+};
+
+export const recordCellUsage = async (
+    userId: string,
+    rowIndex: number,
+    colIndex: number,
+    date: string
+): Promise<boolean> => {
+    if (!userId) return false;
+    try {
+        const matrix = await getMatrix(userId);
+        if (!matrix) return false;
+
+        const cellKey = `${rowIndex}-${colIndex}`;
+        const updatedMatrix: MatrixData = {
+            ...matrix,
+            cellUsage: {
+                ...matrix.cellUsage,
+                [cellKey]: date
+            }
+        };
+
+        return await saveMatrix(userId, updatedMatrix);
+    } catch (error) {
+        console.error("Error recording cell usage:", error);
         return false;
     }
 };

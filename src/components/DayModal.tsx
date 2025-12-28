@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DayData, Status, PostFormat, PostRule } from '@/types/calendar';
 import { updateDay } from '@/services/calendarService';
-import { getMatrix } from '@/services/matrixService';
+import { getMatrix, recordCellUsage } from '@/services/matrixService';
 import MatrixModal from './MatrixModal';
 import { useAuth } from './AuthContext';
 
@@ -57,10 +57,18 @@ const DayModal: React.FC<DayModalProps> = ({ date, initialData, onClose }) => {
         }
     };
 
-    const advanceStatus = () => {
+    const advanceStatus = async () => {
         if (currentStatusIndex < statusOrder.length - 1 && canAdvance()) {
             const nextStatus = statusOrder[currentStatusIndex + 1];
-            handleSave({ ...data, status: nextStatus });
+            const newData = { ...data, status: nextStatus };
+
+            // If advancing to POST and there's a matrix reference, record usage
+            if (nextStatus === Status.POST && data.matrixReference && user) {
+                const { rowIndex, colIndex } = data.matrixReference;
+                await recordCellUsage(user.uid, rowIndex, colIndex, data.date);
+            }
+
+            handleSave(newData);
         }
     };
 

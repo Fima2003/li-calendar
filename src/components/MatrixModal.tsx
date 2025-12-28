@@ -41,6 +41,7 @@ const MatrixModal: React.FC<MatrixModalProps> = ({ onClose, mode = 'edit', onSel
     const [loading, setLoading] = useState(true);
     const [isDirty, setIsDirty] = useState(false);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [cellUsage, setCellUsage] = useState<{ [key: string]: string }>({});
 
     // Show toast helper
     const showToast = (msg: string) => {
@@ -57,12 +58,28 @@ const MatrixModal: React.FC<MatrixModalProps> = ({ onClose, mode = 'edit', onSel
                     setColHeaders(data.colHeaders || []);
                     setRowHeaders(data.rowHeaders || []);
                     setCells(data.cells || []);
+                    setCellUsage(data.cellUsage || {});
                 }
             }
             setLoading(false);
         };
         loadData();
     }, [user]);
+
+    // Helper to get relative time string
+    const getRelativeTime = (dateStr: string): string => {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) return 'today';
+        if (diffDays === 1) return '1d ago';
+        if (diffDays < 7) return `${diffDays}d ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+        if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+        return `${Math.floor(diffDays / 365)}y ago`;
+    };
 
     // Handle Close Attempt
     const handleCloseAttempt = () => {
@@ -316,6 +333,12 @@ const MatrixModal: React.FC<MatrixModalProps> = ({ onClose, mode = 'edit', onSel
                                                 ) : (
                                                     <div className="w-full h-full p-2 text-sm overflow-y-auto max-h-[150px]">
                                                         {cell}
+                                                    </div>
+                                                )}
+                                                {/* Usage Badge */}
+                                                {cellUsage[`${rIndex}-${cIndex}`] && (
+                                                    <div className="absolute bottom-1 right-1 text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-300">
+                                                        {getRelativeTime(cellUsage[`${rIndex}-${cIndex}`])}
                                                     </div>
                                                 )}
                                             </div>
