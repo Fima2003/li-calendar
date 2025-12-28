@@ -1,0 +1,67 @@
+import { db } from "@/lib/firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+
+export interface MatrixData {
+    colHeaders: string[];
+    rowHeaders: string[];
+    cells: string[][];
+}
+
+interface MatrixFirestoreData {
+    colHeaders: string[];
+    rowHeaders: string[];
+    rows: { data: string[] }[];
+}
+
+const getUserMatrixDoc = (userId: string) => {
+    return doc(db, "users", userId, "settings", "matrix");
+};
+
+export const getMatrix = async (userId: string): Promise<MatrixData | null> => {
+    if (!userId) return null;
+    try {
+        const docRef = getUserMatrixDoc(userId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const data = docSnap.data() as MatrixFirestoreData;
+            // Backwards compatibility or transform
+            let cells: string[][] = [];
+            if (data.rows && Array.isArray(data.rows)) {
+                cells = data.rows.map(r => r.data);
+            } else if ((data as any).cells) {
+                // Handle legacy if any (though we know it failed to save, just in case)
+                cells = (data as any).cells;
+            }
+
+            return {
+                colHeaders: data.colHeaders || [],
+                rowHeaders: data.rowHeaders || [],
+                cells: cells
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching matrix:", error);
+        return null;
+    }
+};
+
+export const saveMatrix = async (userId: string, data: MatrixData): Promise<boolean> => {
+    if (!userId) return false;
+    try {
+        const docRef = getUserMatrixDoc(userId);
+
+        // Transform 2D array to object list for Firestore
+        const firestoreData: MatrixFirestoreData = {
+            colHeaders: data.colHeaders,
+            rowHeaders: data.rowHeaders,
+            rows: data.cells.map(row => ({ data: row }))
+        };
+
+        await setDoc(docRef, firestoreData, { merge: true });
+        return true;
+    } catch (error) {
+        console.error("Error saving matrix:", error);
+        return false;
+    }
+};

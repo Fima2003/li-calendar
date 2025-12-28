@@ -6,13 +6,19 @@ import { CalendarMonthData } from '@/types/calendar';
 import DayCell from './DayCell';
 import StatsWidget from './StatsWidget';
 import DayModal from './DayModal';
+import MatrixModal from './MatrixModal';
 import { useAuth } from './AuthContext';
 
 const CalendarGrid = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [calendarData, setCalendarData] = useState<CalendarMonthData>({});
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [showMatrixModal, setShowMatrixModal] = useState(false);
     const { user, loading, logout } = useAuth();
+
+    // Import dynamically or normally? importing normally.
+    // Need to update imports at the top manually via another block or rely on auto-imports if I wasn't careful (but I am).
+    // Let's assume I need to add the import.
 
     useEffect(() => {
         const fetchData = async () => {
@@ -108,10 +114,23 @@ const CalendarGrid = () => {
                         {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                     </h1>
                 </div>
-                <div>
+                <div className="flex">
+                    <button
+                        onClick={() => setShowMatrixModal(true)}
+                        className="neo-button bg-neo-blue text-white hover:brightness-110 mr-4 flex items-center gap-2"
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <line x1="3" y1="9" x2="21" y2="9" />
+                            <line x1="3" y1="15" x2="21" y2="15" />
+                            <line x1="9" y1="3" x2="9" y2="21" />
+                            <line x1="15" y1="3" x2="15" y2="21" />
+                        </svg>
+                        Matrix
+                    </button>
                     <button
                         onClick={logout}
-                        className="neo-button bg-neo-pink text-white hover:brightness-110 ml-4"
+                        className="neo-button bg-neo-pink text-white hover:brightness-110"
                     >
                         Sign Out
                     </button>
@@ -162,6 +181,11 @@ const CalendarGrid = () => {
                     initialData={calendarData[selectedDate.toISOString().split('T')[0]]}
                     onClose={handleModalClose}
                 />
+            )}
+
+            {/* Matrix Modal */}
+            {showMatrixModal && (
+                <MatrixModal onClose={() => setShowMatrixModal(false)} />
             )}
         </div>
     );
