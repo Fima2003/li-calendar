@@ -85,15 +85,15 @@ const CalendarGrid = () => {
     };
 
     return (
-        <div className="min-h-screen bg-neo-white p-8">
+        <div className="min-h-screen bg-neo-white p-4 md:p-8">
             <StatsWidget data={calendarData} />
 
-            <div className="mb-8 flex justify-between items-center">
-                <div className="flex items-center gap-4">
+            <div className="mb-4 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full md:w-auto">
                     <div className="flex gap-2">
                         <button
                             onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))}
-                            className="neo-button bg-white hover:bg-gray-100 px-3 py-2"
+                            className="neo-button bg-white hover:bg-gray-100 px-4 py-3 min-w-[44px] min-h-[44px] flex items-center justify-center"
                             title="Previous Month"
                         >
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -102,7 +102,7 @@ const CalendarGrid = () => {
                         </button>
                         <button
                             onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))}
-                            className="neo-button bg-white hover:bg-gray-100 px-3 py-2"
+                            className="neo-button bg-white hover:bg-gray-100 px-4 py-3 min-w-[44px] min-h-[44px] flex items-center justify-center"
                             title="Next Month"
                         >
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -110,14 +110,14 @@ const CalendarGrid = () => {
                             </svg>
                         </button>
                     </div>
-                    <h1 className="text-4xl font-black uppercase text-neo-black shadow-neo-sm inline-block bg-neo-yellow px-4 py-2 border-4 border-black">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase text-neo-black shadow-neo-sm inline-block bg-neo-yellow px-3 py-2 md:px-4 md:py-2 border-4 border-black">
                         {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                     </h1>
                 </div>
-                <div className="flex">
+                <div className="flex gap-2 w-full md:w-auto">
                     <button
                         onClick={() => setShowMatrixModal(true)}
-                        className="neo-button bg-neo-blue text-white hover:brightness-110 mr-4 flex items-center gap-2"
+                        className="neo-button bg-neo-blue text-white hover:brightness-110 flex-1 md:flex-none flex items-center justify-center gap-2 min-h-[44px] px-4"
                     >
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
@@ -126,11 +126,11 @@ const CalendarGrid = () => {
                             <line x1="9" y1="3" x2="9" y2="21" />
                             <line x1="15" y1="3" x2="15" y2="21" />
                         </svg>
-                        Matrix
+                        <span className="hidden sm:inline">Matrix</span>
                     </button>
                     <button
                         onClick={logout}
-                        className="neo-button bg-neo-pink text-white hover:brightness-110"
+                        className="neo-button bg-neo-pink text-white hover:brightness-110 flex-1 md:flex-none min-h-[44px] px-4"
                     >
                         Sign Out
                     </button>
@@ -139,7 +139,7 @@ const CalendarGrid = () => {
 
             <div className="grid grid-cols-7 border-t-4 border-l-4 border-neo-black bg-white shadow-neo-lg">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                    <div key={day} className="p-4 border-r-4 border-b-4 border-neo-black font-bold uppercase bg-neo-yellow text-center">
+                    <div key={day} className="p-2 sm:p-3 md:p-4 border-r-4 border-b-4 border-neo-black font-bold uppercase bg-neo-yellow text-center text-xs sm:text-sm md:text-base">
                         {day}
                     </div>
                 ))}
@@ -147,7 +147,7 @@ const CalendarGrid = () => {
             </div>
 
             {/* Legend */}
-            <div className="mt-8 flex flex-wrap gap-6 justify-center">
+            <div className="mt-4 md:mt-8 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 md:gap-6 justify-center">
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-neo-white border-2 border-black"></div>
                     <span className="font-bold text-lg">&mdash;</span>

@@ -10,7 +10,7 @@ interface DayCellProps {
 
 const DayCell: React.FC<DayCellProps> = ({ date, data, onClick, isCurrentMonth }) => {
     if (!isCurrentMonth) {
-        return <div className="bg-gray-100 border-r-2 border-b-2 border-gray-200 h-32 opacity-25"></div>;
+        return <div className="bg-gray-100 border-r-2 border-b-2 border-gray-200 h-20 sm:h-24 md:h-32 opacity-25"></div>;
     }
 
     // Neobrutalist colors based on status? Or just solid blocks?
@@ -34,25 +34,25 @@ const DayCell: React.FC<DayCellProps> = ({ date, data, onClick, isCurrentMonth }
             className={`
         ${getStatusColor(data?.status)}
         border-r-4 border-b-4 border-neo-black
-        h-32 p-2 cursor-pointer transition-all hover:bg-opacity-80 relative group
+        h-20 sm:h-24 md:h-32 p-1.5 sm:p-2 cursor-pointer transition-all hover:bg-opacity-80 relative group
       `}
         >
-            <span className="font-bold text-lg">{dayNumber}</span>
+            <span className="font-bold text-sm sm:text-base md:text-lg">{dayNumber}</span>
 
             {data && (
                 <div className="flex flex-col gap-1 mt-1">
                     {data.status && (
-                        <span className="text-xs font-bold uppercase border-2 border-black inline-block px-1 bg-white">
+                        <span className="text-[10px] sm:text-xs font-bold uppercase border-2 border-black inline-block px-1 bg-white leading-tight">
                             {data.status}
                         </span>
                     )}
                     {data.rule && (
-                        <span className="absolute top-2 right-2 text-xs font-black text-gray-500">
+                        <span className="absolute top-1 sm:top-2 right-1 sm:right-2 text-[10px] sm:text-xs font-black text-gray-500">
                             {data.rule}
                         </span>
                     )}
                     {data.topic && (
-                        <span className="text-xs truncate font-medium mt-1">
+                        <span className="text-[10px] sm:text-xs truncate font-medium mt-0.5 sm:mt-1">
                             {data.topic}
                         </span>
                     )}

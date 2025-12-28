@@ -174,13 +174,13 @@ const MatrixModal: React.FC<MatrixModalProps> = ({ onClose, mode = 'edit', onSel
     if (loading) return null; // Or a spinner
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md p-8">
-            <div className="relative w-[80%] h-[80%] bg-white border-4 border-neo-black shadow-neo-lg flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md p-0 sm:p-4 md:p-8">
+            <div className="relative w-full h-full sm:w-[90%] sm:h-[90%] md:w-[80%] md:h-[80%] bg-white border-4 border-neo-black shadow-neo-lg flex flex-col overflow-hidden">
 
                 {/* Header */}
-                <div className={`flex justify-between items-center p-4 border-b-4 border-neo-black shrink-0 ${mode === 'select' ? 'bg-neo-blue' : 'bg-neo-yellow'}`}>
-                    <h2 className="text-2xl font-black uppercase text-white">{mode === 'select' ? 'Select Content' : 'Content Matrix'}</h2>
-                    <button onClick={handleCloseAttempt} className="neo-button bg-neo-red w-8 h-8 flex items-center justify-center p-0">X</button>
+                <div className={`flex justify-between items-center p-3 sm:p-4 border-b-4 border-neo-black shrink-0 ${mode === 'select' ? 'bg-neo-blue' : 'bg-neo-yellow'}`}>
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-black uppercase text-white">{mode === 'select' ? 'Select Content' : 'Content Matrix'}</h2>
+                    <button onClick={handleCloseAttempt} className="neo-button bg-neo-red min-w-[44px] min-h-[44px] flex items-center justify-center p-0">X</button>
                 </div>
 
                 {/* Toast */}
@@ -192,8 +192,8 @@ const MatrixModal: React.FC<MatrixModalProps> = ({ onClose, mode = 'edit', onSel
 
                 {/* Confirmation Dialog Overlay */}
                 {showConfirmDialog && (
-                    <div className="absolute inset-0 z-[60] bg-black/20 flex items-center justify-center backdrop-blur-sm">
-                        <div className="bg-white border-4 border-black p-6 shadow-neo-lg max-w-sm w-full">
+                    <div className="absolute inset-0 z-[60] bg-black/20 flex items-center justify-center backdrop-blur-sm p-4">
+                        <div className="bg-white border-4 border-black p-4 sm:p-6 shadow-neo-lg max-w-sm w-full">
                             <h3 className="text-xl font-black mb-4">Unsaved Changes</h3>
                             <p className="mb-6 font-bold text-gray-600">Are you sure you want to close without saving?</p>
                             <div className="flex flex-col gap-2">

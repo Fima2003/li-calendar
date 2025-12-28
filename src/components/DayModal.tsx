@@ -229,25 +229,25 @@ const DayModal: React.FC<DayModalProps> = ({ date, initialData, onClose }) => {
     // These seem distinct from the status flow but tied to the day.
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white border-4 border-neo-black shadow-neo-lg w-full max-w-2xl p-6 relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-0 sm:p-4">
+            <div className="bg-white border-4 border-neo-black shadow-neo-lg w-full h-full sm:h-auto sm:max-w-2xl p-4 sm:p-6 relative sm:max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="flex justify-between items-start mb-6">
+                <div className="flex justify-between items-start mb-4 sm:mb-6">
                     <div>
-                        <h2 className="text-2xl font-black uppercase bg-neo-pink inline-block px-2 border-2 border-black">
+                        <h2 className="text-xl sm:text-2xl font-black uppercase bg-neo-pink inline-block px-2 border-2 border-black">
                             {date.toDateString()}
                         </h2>
                         <div className="mt-2 flex gap-2">
-                            <span className="text-sm font-bold bg-neo-blue border-2 border-black px-2 py-0.5">
+                            <span className="text-xs sm:text-sm font-bold bg-neo-blue border-2 border-black px-2 py-0.5">
                                 {data.status}
                             </span>
                         </div>
                     </div>
-                    <button onClick={onClose} className="neo-button bg-neo-red leading-none">X</button>
+                    <button onClick={onClose} className="neo-button bg-neo-red leading-none min-w-[44px] min-h-[44px] flex items-center justify-center">X</button>
                 </div>
 
                 {/* Format & Rule Selectors */}
-                <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 border-2 border-black">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 border-2 border-black">
                     <div>
                         <label className="block text-xs font-bold uppercase mb-1">Format</label>
                         <select
