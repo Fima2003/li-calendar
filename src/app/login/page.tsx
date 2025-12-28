@@ -26,11 +26,11 @@ export default function LoginPage() {
         <div className="flex h-screen flex-col items-center justify-center bg-gradient-to-br from-neo-yellow via-neo-pink to-neo-blue p-4">
             <div className="w-full max-w-md space-y-8 rounded-xl border-4 border-black bg-white p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                 <div className="text-center">
-                    <h2 className="mt-6 text-3xl font-black text-black">
-                        Welcome Back!
-                    </h2>
-                    <p className="mt-2 text-sm text-zinc-600">
-                        Sign in to manage your content calendar.
+                    <h1 className="text-5xl font-black text-black mb-4">
+                        Li-Calendar
+                    </h1>
+                    <p className="text-lg font-bold text-zinc-700">
+                        Make sure your <span className="text-blue-600 font-black">LinkedIn</span> stays <span className="text-neo-pink">YOURS</span>
                     </p>
                 </div>
 
