@@ -19,9 +19,11 @@ const PlusIcon = () => (
 
 interface MatrixModalProps {
     onClose: () => void;
+    mode?: 'edit' | 'select';
+    onSelect?: (rowIndex: number, colIndex: number, text: string) => void;
 }
 
-const MatrixModal: React.FC<MatrixModalProps> = ({ onClose }) => {
+const MatrixModal: React.FC<MatrixModalProps> = ({ onClose, mode = 'edit', onSelect }) => {
     const { user } = useAuth();
 
     // Initial State Headers
@@ -176,8 +178,8 @@ const MatrixModal: React.FC<MatrixModalProps> = ({ onClose }) => {
             <div className="relative w-[80%] h-[80%] bg-white border-4 border-neo-black shadow-neo-lg flex flex-col overflow-hidden">
 
                 {/* Header */}
-                <div className="flex justify-between items-center p-4 border-b-4 border-neo-black bg-neo-yellow shrink-0">
-                    <h2 className="text-2xl font-black uppercase">Content Matrix</h2>
+                <div className={`flex justify-between items-center p-4 border-b-4 border-neo-black shrink-0 ${mode === 'select' ? 'bg-neo-blue' : 'bg-neo-yellow'}`}>
+                    <h2 className="text-2xl font-black uppercase text-white">{mode === 'select' ? 'Select Content' : 'Content Matrix'}</h2>
                     <button onClick={handleCloseAttempt} className="neo-button bg-neo-red w-8 h-8 flex items-center justify-center p-0">X</button>
                 </div>
 
@@ -236,19 +238,27 @@ const MatrixModal: React.FC<MatrixModalProps> = ({ onClose }) => {
                                 {/* Column Headers */}
                                 {colHeaders.map((col, i) => (
                                     <div key={`col-${i}`} className="bg-gray-100 p-2 sticky top-0 z-10 group relative h-16 flex items-center justify-center">
-                                        <input
-                                            type="text"
-                                            value={col}
-                                            onChange={(e) => updateColHeader(i, e.target.value)}
-                                            className="w-full bg-transparent font-black text-center outline-none uppercase break-words"
-                                        />
-                                        <button
-                                            onClick={() => deleteCol(i)}
-                                            className="opacity-0 group-hover:opacity-100 absolute top-1 right-1 text-red-500 hover:bg-red-100 rounded p-1"
-                                            title="Delete Column"
-                                        >
-                                            <TrashIcon />
-                                        </button>
+                                        {mode === 'edit' ? (
+                                            <input
+                                                type="text"
+                                                value={col}
+                                                onChange={(e) => updateColHeader(i, e.target.value)}
+                                                className="w-full bg-transparent font-black text-center outline-none uppercase break-words"
+                                            />
+                                        ) : (
+                                            <div className="w-full bg-transparent font-black text-center uppercase break-words px-1">
+                                                {col}
+                                            </div>
+                                        )}
+                                        {mode === 'edit' && (
+                                            <button
+                                                onClick={() => deleteCol(i)}
+                                                className="opacity-0 group-hover:opacity-100 absolute top-1 right-1 text-red-500 hover:bg-red-100 rounded p-1"
+                                                title="Delete Column"
+                                            >
+                                                <TrashIcon />
+                                            </button>
+                                        )}
                                     </div>
                                 ))}
 
@@ -257,30 +267,57 @@ const MatrixModal: React.FC<MatrixModalProps> = ({ onClose }) => {
                                     <React.Fragment key={`row-${rIndex}`}>
                                         {/* Row Header */}
                                         <div className="bg-gray-100 p-2 sticky left-0 z-10 group relative flex items-center min-h-[120px]">
-                                            <input
-                                                type="text"
-                                                value={rowHeader}
-                                                onChange={(e) => updateRowHeader(rIndex, e.target.value)}
-                                                className="w-full bg-transparent font-black text-left outline-none"
-                                            />
-                                            <button
-                                                onClick={() => deleteRow(rIndex)}
-                                                className="opacity-0 group-hover:opacity-100 absolute top-1 right-1 text-red-500 hover:bg-red-100 rounded p-1"
-                                                title="Delete Row"
-                                            >
-                                                <TrashIcon />
-                                            </button>
+                                            {mode === 'edit' ? (
+                                                <input
+                                                    type="text"
+                                                    value={rowHeader}
+                                                    onChange={(e) => updateRowHeader(rIndex, e.target.value)}
+                                                    className="w-full bg-transparent font-black text-left outline-none"
+                                                />
+                                            ) : (
+                                                <div className="w-full bg-transparent font-black text-left">
+                                                    {rowHeader}
+                                                </div>
+                                            )}
+                                            {mode === 'edit' && (
+                                                <button
+                                                    onClick={() => deleteRow(rIndex)}
+                                                    className="opacity-0 group-hover:opacity-100 absolute top-1 right-1 text-red-500 hover:bg-red-100 rounded p-1"
+                                                    title="Delete Row"
+                                                >
+                                                    <TrashIcon />
+                                                </button>
+                                            )}
                                         </div>
 
                                         {/* Cells */}
                                         {cells[rIndex].map((cell, cIndex) => (
-                                            <div key={`cell-${rIndex}-${cIndex}`} className="bg-white p-0 relative">
-                                                <textarea
-                                                    value={cell}
-                                                    onChange={(e) => updateCell(rIndex, cIndex, e.target.value)}
-                                                    className="w-full h-full p-2 resize-none outline-none focus:bg-yellow-50 text-sm"
-                                                    placeholder="..."
-                                                />
+                                            <div
+                                                key={`cell-${rIndex}-${cIndex}`}
+                                                className={`bg-white p-0 relative ${mode === 'select'
+                                                    ? cell
+                                                        ? 'cursor-pointer hover:bg-neo-blue hover:text-white transition-colors'
+                                                        : 'cursor-not-allowed bg-gray-50'
+                                                    : ''
+                                                    }`}
+                                                onClick={() => {
+                                                    if (mode === 'select' && cell && onSelect) {
+                                                        onSelect(rIndex, cIndex, cell);
+                                                    }
+                                                }}
+                                            >
+                                                {mode === 'edit' ? (
+                                                    <textarea
+                                                        value={cell}
+                                                        onChange={(e) => updateCell(rIndex, cIndex, e.target.value)}
+                                                        className="w-full h-full p-2 resize-none outline-none focus:bg-yellow-50 text-sm"
+                                                        placeholder="..."
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full p-2 text-sm overflow-y-auto max-h-[150px]">
+                                                        {cell}
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </React.Fragment>
@@ -309,15 +346,17 @@ const MatrixModal: React.FC<MatrixModalProps> = ({ onClose }) => {
                 </div>
 
                 {/* Footer / Save Action */}
-                <div className="p-4 border-t-4 border-black bg-gray-50 flex justify-end">
-                    <button
-                        onClick={() => handleSave(false)}
-                        disabled={!isDirty}
-                        className="neo-button bg-neo-blue text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        Save
-                    </button>
-                </div>
+                {mode === 'edit' && (
+                    <div className="p-4 border-t-4 border-black bg-gray-50 flex justify-end">
+                        <button
+                            onClick={() => handleSave(false)}
+                            disabled={!isDirty}
+                            className="neo-button bg-neo-blue text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Save
+                        </button>
+                    </div>
+                )}
 
             </div>
         </div>

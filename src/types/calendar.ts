@@ -28,6 +28,10 @@ export interface DayData {
   finalText?: string; // For "Polish text" and onwards
   format?: PostFormat;
   rule?: PostRule;
+  matrixReference?: {
+    rowIndex: number;
+    colIndex: number;
+  } | null;
 }
 
 export interface CalendarMonthData {

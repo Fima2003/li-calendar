@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { DayData, Status, PostFormat, PostRule } from '@/types/calendar';
 import { updateDay } from '@/services/calendarService';
+import { getMatrix } from '@/services/matrixService';
+import MatrixModal from './MatrixModal';
 import { useAuth } from './AuthContext';
 
 interface DayModalProps {
@@ -12,6 +14,7 @@ interface DayModalProps {
 const DayModal: React.FC<DayModalProps> = ({ date, initialData, onClose }) => {
     const [data, setData] = useState<DayData>(initialData || { date: date.toISOString().split('T')[0], status: Status.CHOOSE_TOPIC });
     const [loading, setLoading] = useState(false);
+    const [showMatrixSelect, setShowMatrixSelect] = useState(false);
     const { user } = useAuth();
 
     // States for the wizard flow
@@ -77,19 +80,90 @@ const DayModal: React.FC<DayModalProps> = ({ date, initialData, onClose }) => {
         }
     };
 
+    // Sync from Matrix if referenced and not posted
+    useEffect(() => {
+        const syncMatrixData = async () => {
+            if (user && data.matrixReference && data.status !== Status.POST) {
+                const matrix = await getMatrix(user.uid);
+                if (matrix && matrix.cells) {
+                    const { rowIndex, colIndex } = data.matrixReference;
+                    const cellValue = matrix.cells[rowIndex]?.[colIndex];
+                    if (cellValue && cellValue !== data.topic) {
+                        handleChange('topic', cellValue);
+                    }
+                }
+            }
+        };
+        syncMatrixData();
+    }, [user, data.matrixReference, data.status]); // Depend on reference to re-sync
+    // Note: To be truly "live", we might need a listener, but fetching on mount/update is likely sufficient for this MVP.
+
+    const handleMatrixSelect = (rowIndex: number, colIndex: number, text: string) => {
+        const newData = {
+            ...data,
+            topic: text,
+            matrixReference: { rowIndex, colIndex }
+        };
+        handleSave(newData);
+        setShowMatrixSelect(false);
+    };
+
+    const handleDereference = () => {
+        const newData = { ...data, matrixReference: null };
+        handleSave(newData);
+    };
+
     const renderContent = () => {
         switch (data.status) {
             case Status.CHOOSE_TOPIC:
                 return (
                     <div>
                         <label className="block font-bold mb-2">Topic {!canAdvance() && <span className="text-neo-red text-xs ml-2">(Required)</span>}</label>
-                        <input
-                            type="text"
-                            className="neo-input w-full"
-                            value={data.topic || ''}
-                            onChange={(e) => handleChange('topic', e.target.value)}
-                            placeholder="What is this post about?"
-                        />
+                        <div className="flex gap-2">
+                            {data.matrixReference ? (
+                                <div className="flex-1 flex items-center neo-input bg-gray-100 text-gray-500 italic relative group">
+                                    <span className="truncate pr-8">Linked: {data.topic}</span>
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-10 pointer-events-none">
+                                        {/* Hover effect? */}
+                                    </div>
+                                    <button
+                                        onClick={handleDereference}
+                                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-red-500 hover:text-red-700"
+                                        title="Unlink from Matrix"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                            ) : (
+                                <input
+                                    type="text"
+                                    className="neo-input w-full flex-1"
+                                    value={data.topic || ''}
+                                    onChange={(e) => handleChange('topic', e.target.value)}
+                                    placeholder="What is this post about?"
+                                />
+                            )}
+
+                            {!data.matrixReference && (
+                                <button
+                                    onClick={() => setShowMatrixSelect(true)}
+                                    className="neo-button bg-neo-pink px-4 flex items-center justify-center"
+                                    title="Choose from Matrix"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                                        <line x1="3" y1="15" x2="21" y2="15"></line>
+                                        <line x1="9" y1="3" x2="9" y2="21"></line>
+                                        <line x1="15" y1="3" x2="15" y2="21"></line>
+                                    </svg>
+                                </button>
+                            )}
+                        </div>
+                        {data.matrixReference && <div className="text-xs text-gray-500 mt-1">This topic is linked to the Content Matrix.</div>}
                     </div>
                 );
             case Status.THINK_OF_TEXT:
@@ -237,6 +311,13 @@ const DayModal: React.FC<DayModalProps> = ({ date, initialData, onClose }) => {
                     </div>
                 </div>
             </div>
+            {showMatrixSelect && (
+                <MatrixModal
+                    onClose={() => setShowMatrixSelect(false)}
+                    mode="select"
+                    onSelect={handleMatrixSelect}
+                />
+            )}
         </div>
     );
 };
