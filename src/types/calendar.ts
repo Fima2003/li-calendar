@@ -24,7 +24,7 @@ export interface DayData {
   date: string; // ISO date string YYYY-MM-DD
   status: Status;
   topic?: string;
-  notes?: string; // For "Think of text" sketches
+  notes?: string[]; // For "Think of text" sketches
   finalText?: string; // For "Polish text" and onwards
   format?: PostFormat;
   rule?: PostRule;

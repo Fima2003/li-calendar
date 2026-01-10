@@ -30,7 +30,11 @@ export const getCalendarData = async (month: number, year: number, userId: strin
 
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
-            data[doc.id] = doc.data() as DayData;
+            const d = doc.data() as any;
+            if (d.notes && typeof d.notes === 'string') {
+                d.notes = [d.notes];
+            }
+            data[doc.id] = d as DayData;
         });
     } catch (error) {
         console.error("Firestore fetch failed:", error);

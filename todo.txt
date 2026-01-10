@@ -1,0 +1,3 @@
+1. make the days that have passed a little bit darker
+2. when on "final text" mode in modal, make the modal a bit wider, and show the notes on the right, so I can see
+3. In the schedule mode, when pressed on text, I should be able to copy it
