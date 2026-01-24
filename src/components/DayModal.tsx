@@ -5,6 +5,8 @@ import { getMatrix, recordCellUsage } from '@/services/matrixService';
 import MatrixModal from './MatrixModal';
 import HooksModal from './HooksModal';
 import { useAuth } from './AuthContext';
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface DayModalProps {
     date: Date;
@@ -117,6 +119,54 @@ const DayModal: React.FC<DayModalProps> = ({ date, initialData, onClose }) => {
     const handleDereference = () => {
         if (isLocked) return;
         handleChange('matrixReference', null);
+    };
+
+
+    const [isLinkedConnected, setIsLinkedConnected] = useState(false);
+    const [isPosting, setIsPosting] = useState(false);
+
+    useEffect(() => {
+        const checkConnection = async () => {
+            if (user) {
+                try {
+                    const docRef = doc(db, "users", user.uid, "integrations", "linkedin");
+                    const docSnap = await getDoc(docRef);
+                    setIsLinkedConnected(docSnap.exists());
+                } catch (e) {
+                    console.error("Failed to check linkedin connection", e);
+                }
+            }
+        };
+        checkConnection();
+    }, [user]);
+
+    const handlePostToLinkedIn = async () => {
+        if (!user || !data.finalText) return;
+        setIsPosting(true);
+        try {
+            const resp = await fetch("/api/linkedin/post", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userId: user.uid,
+                    content: data.finalText
+                })
+            });
+
+            const result = await resp.json();
+            if (!resp.ok) {
+                alert("Failed to post: " + (result.error || "Unknown error"));
+            } else {
+                alert("Posted successfully!");
+                // Optionally auto-close or update status?
+                // Status is already POST.
+            }
+        } catch (e) {
+            console.error("Post error", e);
+            alert("Error posting to LinkedIn");
+        } finally {
+            setIsPosting(false);
+        }
     };
 
     return (
@@ -274,13 +324,23 @@ const DayModal: React.FC<DayModalProps> = ({ date, initialData, onClose }) => {
 
                         {/* Action Buttons */}
                         <div className="grid grid-cols-2 gap-4 mt-2">
-                            <button
-                                onClick={handlePublish}
-                                disabled={isLocked}
-                                className="neo-button bg-neo-blue py-3 text-lg font-black uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                Publish
-                            </button>
+                            {data.status === Status.POST && isLinkedConnected ? (
+                                <button
+                                    onClick={handlePostToLinkedIn}
+                                    disabled={isPosting}
+                                    className="neo-button bg-neo-blue py-3 text-lg font-black uppercase tracking-wider disabled:opacity-50"
+                                >
+                                    {isPosting ? "Posting..." : "Post to LinkedIn"}
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handlePublish}
+                                    disabled={isLocked}
+                                    className="neo-button bg-neo-blue py-3 text-lg font-black uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Publish
+                                </button>
+                            )}
                             <button
                                 onClick={() => handleSave()}
                                 className="neo-button bg-neo-green py-3 text-lg font-black uppercase tracking-wider"

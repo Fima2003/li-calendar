@@ -8,6 +8,7 @@ import StatsWidget from './StatsWidget';
 import DayModal from './DayModal';
 import MatrixModal from './MatrixModal';
 import { useAuth } from './AuthContext';
+import LinkedInConnect from './LinkedInConnect';
 
 const CalendarGrid = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -128,6 +129,7 @@ const CalendarGrid = () => {
                         </svg>
                         <span className="hidden sm:inline">Matrix</span>
                     </button>
+                    <LinkedInConnect />
                     <button
                         onClick={logout}
                         className="neo-button bg-neo-pink text-white hover:brightness-110 flex-1 md:flex-none min-h-[44px] px-4"
