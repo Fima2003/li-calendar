@@ -7,6 +7,7 @@ import DayCell from './DayCell';
 import StatsWidget from './StatsWidget';
 import DayModal from './DayModal';
 import MatrixModal from './MatrixModal';
+import ResourcesModal from './ResourcesModal';
 import { useAuth } from './AuthContext';
 
 const CalendarGrid = () => {
@@ -14,6 +15,7 @@ const CalendarGrid = () => {
     const [calendarData, setCalendarData] = useState<CalendarMonthData>({});
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [showMatrixModal, setShowMatrixModal] = useState(false);
+    const [showResourcesModal, setShowResourcesModal] = useState(false);
     const { user, loading, logout } = useAuth();
 
     // Import dynamically or normally? importing normally.
@@ -116,6 +118,16 @@ const CalendarGrid = () => {
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
                     <button
+                        onClick={() => setShowResourcesModal(true)}
+                        className="neo-button bg-neo-green text-white hover:brightness-110 flex-1 md:flex-none flex items-center justify-center gap-2 min-h-[44px] px-4"
+                    >
+                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                        </svg>
+                        <span className="hidden sm:inline">Resources</span>
+                    </button>
+                    <button
                         onClick={() => setShowMatrixModal(true)}
                         className="neo-button bg-neo-blue text-white hover:brightness-110 flex-1 md:flex-none flex items-center justify-center gap-2 min-h-[44px] px-4"
                     >
@@ -186,6 +198,11 @@ const CalendarGrid = () => {
             {/* Matrix Modal */}
             {showMatrixModal && (
                 <MatrixModal onClose={() => setShowMatrixModal(false)} />
+            )}
+
+            {/* Resources Modal */}
+            {showResourcesModal && (
+                <ResourcesModal onClose={() => setShowResourcesModal(false)} />
             )}
         </div>
     );
